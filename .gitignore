@@ -1,0 +1,11 @@
+# Dependencies & Binary tools
+cmd_git/
+cloudflared.exe
+*.exe
+*.zip
+
+# Build targets & IDE
+target/
+.idea/
+*.class
+*.log
