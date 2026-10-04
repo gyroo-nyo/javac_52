@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="JAVACHealth HMS - Advanced Next-Gen Healthcare & Hospital Management System. Real-time patient care, physician scheduling, pharmacy inventory, and clinical billing.">
+  <title>JAVACHealth HMS | Modern Healthcare Management System</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="theme-dark">
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Top Announcement / Live Status Bar -->
+  <aside class="system-status-bar" id="system-status-bar">
+    <div class="status-left">
+      <span class="live-dot pulse"></span>
+      <span class="system-pill"><i class="fa-solid fa-server"></i> MySQL 8.0</span>
+      <span class="system-pill"><i class="fa-solid fa-code-branch"></i> JDBC Connector/J 9.4</span>
+      <span class="status-msg"><strong id="ticker-time">18:55:00</strong> — <strong>Command Center:</strong> All
+        hospital services operational. Emergency triage: Normal.</span>
+    </div>
+    <div class="status-right">
+      <span class="status-pill warning"><i class="fa-solid fa-triangle-exclamation"></i> 2 Low Stock Alerts</span>
+      <span class="status-pill success"><i class="fa-solid fa-shield-halved"></i> HIPAA Compliant Encrypted</span>
+    </div>
+  </aside>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-logo-icon">
+        <i class="fa-solid fa-heart-pulse"></i>
+      </div>
+      <div class="brand-text">
+        <h1 class="brand-title">JAVAC<span>Health</span></h1>
+        <span class="brand-subtitle">ENTERPRISE HMS v2.4</span>
+      </div>
+    </div>
+
+    <!-- Mobile Search Toggle Button -->
+    <button class="btn btn-secondary btn-icon mobile-only" id="btn-mobile-search-toggle" aria-label="Toggle Search">
+      <i class="fa-solid fa-magnifying-glass"></i>
+    </button>
+
+    <!-- Search Bar -->
+    <div class="header-search" id="header-search-container">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input type="text" id="global-search-input" placeholder="Search patients, doctors, medicines..."
+        aria-label="Global Search">
+      <kbd class="search-kbd desktop-only">/</kbd>
+      <div id="search-dropdown" class="search-dropdown hidden"></div>
+    </div>
+
+    <!-- Header Actions & Persona Switcher -->
+    <div class="header-actions">
+      <!-- Role Switcher -->
+      <div class="role-selector-wrapper">
+        <label for="role-select" class="role-label desktop-only"><i class="fa-solid fa-user-shield"></i> Portal:</label>
+        <select id="role-select" class="role-select" aria-label="Select Portal Role">
+          <option value="admin" selected>👑 Admin</option>
+          <option value="doctor">🩺 Doctor</option>
+          <option value="patient">👤 Patient</option>
+        </select>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <button class="btn btn-secondary btn-icon" id="btn-theme-toggle" title="Toggle Theme"
+        aria-label="Toggle dark/light mode">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <button class="btn btn-secondary btn-icon notification-btn desktop-only" id="btn-notifications"
+        title="Notifications" aria-label="Open notifications">
+        <i class="fa-solid fa-bell"></i>
+        <span class="notification-badge" id="notification-count">3</span>
+      </button>
+
+      <!-- Primary Action -->
+      <button class="btn btn-primary desktop-only" id="btn-quick-new-patient">
+        <i class="fa-solid fa-user-plus"></i>
+        <span>Add Patient</span>
+      </button>
+
+      <!-- User Profile Badge -->
+      <div class="user-profile-badge desktop-only" id="user-profile-badge">
+        <div class="avatar" id="current-user-avatar">AD</div>
+        <div class="user-info">
+          <span class="user-name" id="current-user-name">Dr. Marcus Vance</span>
+          <span class="user-role" id="current-user-role">System Administrator</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <nav class="app-sidebar" aria-label="Main Navigation">
+      <div class="nav-section-title">CLINICAL SUITE</div>
+      <ul class="nav-list">
+        <li class="nav-item active" data-tab="tab-dashboard">
+          <a href="#dashboard" class="nav-link" id="nav-dashboard">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Command Center</span>
+          </a>
+        </li>
+        <li class="nav-item" data-tab="tab-patients">
+          <a href="#patients" class="nav-link" id="nav-patients">
+            <i class="fa-solid fa-hospital-user"></i>
+            <span>Patients Directory</span>
+            <span class="nav-pill" id="badge-total-patients">1,428</span>
+          </a>
+        </li>
+        <li class="nav-item" data-tab="tab-doctors">
+          <a href="#doctors" class="nav-link" id="nav-doctors">
+            <i class="fa-solid fa-user-doctor"></i>
+            <span>Physicians & Staff</span>
+          </a>
+        </li>
+        <li class="nav-item" data-tab="tab-appointments">
+          <a href="#appointments" class="nav-link" id="nav-appointments">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span>Appointments</span>
+            <span class="nav-pill active-pill" id="badge-today-appts">12 Today</span>
+          </a>
+        </li>
+        <li class="nav-item" data-tab="tab-records">
+          <a href="#records" class="nav-link" id="nav-records">
+            <i class="fa-solid fa-file-waveform"></i>
+            <span>Medical Records</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="nav-section-title">HOSPITAL OPERATIONS</div>
+      <ul class="nav-list">
+        <li class="nav-item" data-tab="tab-pharmacy">
+          <a href="#pharmacy" class="nav-link" id="nav-pharmacy">
+            <i class="fa-solid fa-pills"></i>
+            <span>Pharmacy & Stock</span>
+            <span class="nav-pill alert-pill">2 Low</span>
+          </a>
+        </li>
+        <li class="nav-item" data-tab="tab-billing">
+          <a href="#billing" class="nav-link" id="nav-billing">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            <span>Billing & Payments</span>
+          </a>
+        </li>
+        <li class="nav-item" data-tab="tab-database">
+          <a href="#database" class="nav-link" id="nav-database">
+            <i class="fa-solid fa-database"></i>
+            <span>SQL & Schema Hub</span>
+            <span class="nav-pill dev-pill">Dev</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Quick Hospital Stats Card -->
+      <div class="sidebar-footer-card">
+        <div class="sfc-header">
+          <span><i class="fa-solid fa-bed-pulse"></i> Bed Occupancy</span>
+          <strong>84%</strong>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 84%;"></div>
+        </div>
+        <div class="sfc-sub">34 of 40 ICU Beds Occupied</div>
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="app-main" id="main-content">
+
+      <!-- ============================================== -->
+      <!-- TAB 1: COMMAND CENTER / DASHBOARD -->
+      <!-- ============================================== -->
+      <section id="tab-dashboard" class="tab-pane active">
+        <!-- Hero Hospital Command Banner -->
+        <div class="hero-command-banner">
+          <div class="hero-bg-overlay"></div>
+          <div class="hero-content">
+            <div class="hero-badge"><i class="fa-solid fa-circle-check"></i> High Availability Cluster: Operational
+            </div>
+            <h2 class="hero-title" id="dashboard-greeting">City General Medical Center</h2>
+            <p class="hero-desc">Unified clinical intelligence, real-time telemetry, synchronized multi-department
+              scheduling, and automated compliance auditing.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" id="btn-hero-book-appointment">
+                <i class="fa-solid fa-calendar-plus"></i> Instant Appointment
+              </button>
+              <button class="btn btn-glass" id="btn-hero-emergency-triage">
+                <i class="fa-solid fa-truck-medical"></i> Emergency Admission
+              </button>
+              <button class="btn btn-glass" id="btn-hero-open-sql">
+                <i class="fa-solid fa-terminal"></i> Database Query Console
+              </button>
+            </div>
+          </div>
+          <div class="hero-telemetry">
+            <div class="telemetry-card">
+              <span class="tele-label">SYSTEM UPTIME</span>
+              <span class="tele-val">99.98%</span>
+              <span class="tele-sub green"><i class="fa-solid fa-arrow-trend-up"></i> Optimal latency</span>
+            </div>
+            <div class="telemetry-card">
+              <span class="tele-label">AVG QUERY TIME</span>
+              <span class="tele-val">1.4 ms</span>
+              <span class="tele-sub"><i class="fa-solid fa-bolt"></i> PreparedStatement Pool</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric Stat Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon-wrapper blue">
+              <i class="fa-solid fa-hospital-user"></i>
+            </div>
+            <div class="stat-details">
+              <span class="stat-title">Total Active Patients</span>
+              <div class="stat-number-row">
+                <span class="stat-number" id="stat-patients-count">1,428</span>
+                <span class="badge-growth positive"><i class="fa-solid fa-arrow-up"></i> +12.4%</span>
+              </div>
+              <span class="stat-caption">Registered in MySQL database</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon-wrapper teal">
+              <i class="fa-solid fa-user-doctor"></i>
+            </div>
+            <div class="stat-details">
+              <span class="stat-title">Physicians On Duty</span>
+              <div class="stat-number-row">
+                <span class="stat-number" id="stat-doctors-count">36</span>
+                <span class="badge-growth neutral"><i class="fa-solid fa-check"></i> 8 Departments</span>
+              </div>
+              <span class="stat-caption">Cardio, Neuro, Ortho, Surgery</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon-wrapper purple">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div class="stat-details">
+              <span class="stat-title">Today's Appointments</span>
+              <div class="stat-number-row">
+                <span class="stat-number" id="stat-appts-count">48</span>
+                <span class="badge-growth positive"><i class="fa-solid fa-arrow-up"></i> 14 Pending</span>
+              </div>
+              <span class="stat-caption">34 Completed, 0 Cancelled</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon-wrapper orange">
+              <i class="fa-solid fa-file-invoice-dollar"></i>
+            </div>
+            <div class="stat-details">
+              <span class="stat-title">Revenue (This Month)</span>
+              <div class="stat-number-row">
+                <span class="stat-number" id="stat-revenue-count">$128,450</span>
+                <span class="badge-growth positive"><i class="fa-solid fa-arrow-up"></i> +8.2%</span>
+              </div>
+              <span class="stat-caption">96.8% Collection efficiency</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Two-Column Flow -->
+        <div class="dashboard-split-grid">
+          <!-- Left: Today's Appointments Live Queue -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title-group">
+                <h3 class="panel-title"><i class="fa-solid fa-clock"></i> Today's Consultation Schedule</h3>
+                <span class="panel-subtitle">Live sync with appointments table</span>
+              </div>
+              <div class="panel-controls">
+                <button class="btn btn-xs btn-outline" id="btn-refresh-queue"><i class="fa-solid fa-arrows-rotate"></i>
+                  Refresh</button>
+                <button class="btn btn-xs btn-primary" id="btn-quick-book-today"><i class="fa-solid fa-plus"></i> New
+                  Slot</button>
+              </div>
+            </div>
+            <div class="appointment-queue-list" id="dashboard-queue-container">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Right: Department Performance & Hospital Feeds -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title-group">
+                <h3 class="panel-title"><i class="fa-solid fa-chart-column"></i> Department Workload</h3>
+                <span class="panel-subtitle">Current clinical caseload distribution</span>
+              </div>
+              <span class="badge badge-info">Real-time</span>
+            </div>
+            <div class="dept-bars-container">
+              <div class="dept-bar-item">
+                <div class="dept-bar-labels">
+                  <span class="dept-name"><i class="fa-solid fa-heart-pulse"></i> Cardiology</span>
+                  <span class="dept-stat">42 / 50 slots (84%)</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill teal" style="width: 84%;"></div>
+                </div>
+              </div>
+
+              <div class="dept-bar-item">
+                <div class="dept-bar-labels">
+                  <span class="dept-name"><i class="fa-solid fa-brain"></i> Neurology</span>
+                  <span class="dept-stat">28 / 35 slots (80%)</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill blue" style="width: 80%;"></div>
+                </div>
+              </div>
+
+              <div class="dept-bar-item">
+                <div class="dept-bar-labels">
+                  <span class="dept-name"><i class="fa-solid fa-bone"></i> Orthopedics</span>
+                  <span class="dept-stat">36 / 40 slots (90%)</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill purple" style="width: 90%;"></div>
+                </div>
+              </div>
+
+              <div class="dept-bar-item">
+                <div class="dept-bar-labels">
+                  <span class="dept-name"><i class="fa-solid fa-baby"></i> Pediatrics</span>
+                  <span class="dept-stat">19 / 30 slots (63%)</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill green" style="width: 63%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Hospital Activity Feed -->
+            <div class="activity-feed-section">
+              <h4 class="sub-heading"><i class="fa-solid fa-bell"></i> Live Activity Feed</h4>
+              <ul class="activity-feed-list" id="activity-feed-list">
+                <li class="activity-item">
+                  <span class="act-dot green"></span>
+                  <div class="act-body">
+                    <p class="act-text"><strong>Dr. Sarah Smith</strong> completed consultation for <strong>Emily
+                        Watson</strong></p>
+                    <span class="act-time">2 mins ago • Cardiology Clinic</span>
+                  </div>
+                </li>
+                <li class="activity-item">
+                  <span class="act-dot blue"></span>
+                  <div class="act-body">
+                    <p class="act-text">New patient registered: <strong>Rajesh Kumar</strong> (Blood: O+)</p>
+                    <span class="act-time">14 mins ago • Reception Desk 1</span>
+                  </div>
+                </li>
+                <li class="activity-item">
+                  <span class="act-dot orange"></span>
+                  <div class="act-body">
+                    <p class="act-text">Pharmacy inventory alert: <strong>Amoxicillin 500mg</strong> low on stock (15
+                      units remaining)</p>
+                    <span class="act-time">28 mins ago • Central Pharmacy</span>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 2: PATIENTS DIRECTORY (CRUD + DETAILS) -->
+      <!-- ============================================== -->
+      <section id="tab-patients" class="tab-pane">
+        <div class="pane-header">
+          <div class="pane-title-group">
+            <h2 class="pane-title">Patient Records Directory</h2>
+            <p class="pane-subtitle">Manage patient admission, demographics, vitals, medical history, and emergency
+              contacts.</p>
+          </div>
+          <div class="pane-actions">
+            <button class="btn btn-outline" id="btn-export-patients"><i class="fa-solid fa-download"></i> Export
+              CSV</button>
+            <button class="btn btn-primary" id="btn-open-add-patient-modal"><i class="fa-solid fa-user-plus"></i>
+              Register New Patient</button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Bar for Patients -->
+        <div class="table-toolbar">
+          <div class="toolbar-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="patient-search-filter"
+              placeholder="Filter by patient name, phone, blood group, or ID...">
+          </div>
+          <div class="toolbar-filters">
+            <select id="patient-blood-filter" class="form-select-sm">
+              <option value="ALL">All Blood Groups</option>
+              <option value="O+">O+</option>
+              <option value="A+">A+</option>
+              <option value="B+">B+</option>
+              <option value="AB+">AB+</option>
+              <option value="O-">O-</option>
+              <option value="A-">A-</option>
+              <option value="B-">B-</option>
+            </select>
+            <select id="patient-status-filter" class="form-select-sm">
+              <option value="ALL">All Statuses</option>
+              <option value="Inpatient">Inpatient</option>
+              <option value="Outpatient">Outpatient</option>
+              <option value="Discharged">Discharged</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Patients Data Table -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table" id="patients-table">
+              <thead>
+                <tr>
+                  <th>Patient ID</th>
+                  <th>Patient Name</th>
+                  <th>Age / Gender</th>
+                  <th>Blood Group</th>
+                  <th>Phone / Email</th>
+                  <th>Emergency Contact</th>
+                  <th>Status</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="patients-table-body">
+                <!-- Dynamically Rendered -->
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="patient-count-display">Showing 8 of 8 patients</span>
+            <div class="table-pagination">
+              <button class="btn-page" disabled><i class="fa-solid fa-chevron-left"></i></button>
+              <span class="page-current">Page 1 of 1</span>
+              <button class="btn-page" disabled><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 3: PHYSICIANS & STAFF DIRECTORY -->
+      <!-- ============================================== -->
+      <section id="tab-doctors" class="tab-pane">
+        <div class="pane-header">
+          <div class="pane-title-group">
+            <h2 class="pane-title">Medical Staff & Physicians</h2>
+            <p class="pane-subtitle">Board-certified specialists, chief surgeons, consulting fees, and real-time on-duty
+              status.</p>
+          </div>
+          <div class="pane-actions">
+            <button class="btn btn-primary" id="btn-add-doctor"><i class="fa-solid fa-user-doctor"></i> Add
+              Physician</button>
+          </div>
+        </div>
+
+        <!-- Doctors Grid -->
+        <div class="doctors-grid" id="doctors-cards-grid">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 4: APPOINTMENTS & SCHEDULER -->
+      <!-- ============================================== -->
+      <section id="tab-appointments" class="tab-pane">
+        <div class="pane-header">
+          <div class="pane-title-group">
+            <h2 class="pane-title">Clinical Appointment Desk</h2>
+            <p class="pane-subtitle">Schedule, reschedule, filter, and track doctor consultations with multi-threaded
+              JDBC transactions.</p>
+          </div>
+          <div class="pane-actions">
+            <button class="btn btn-outline" id="btn-filter-today-appts"><i class="fa-solid fa-calendar-day"></i> Filter
+              Today</button>
+            <button class="btn btn-primary" id="btn-open-book-modal"><i class="fa-solid fa-calendar-plus"></i> Book
+              Consultation</button>
+          </div>
+        </div>
+
+        <!-- Appointment Status Filter Tabs -->
+        <div class="subtabs-bar">
+          <button class="subtab-btn active" data-filter="ALL">All Consultations (<span
+              id="count-all-appts">6</span>)</button>
+          <button class="subtab-btn" data-filter="Scheduled">Scheduled (<span
+              id="count-scheduled-appts">3</span>)</button>
+          <button class="subtab-btn" data-filter="Completed">Completed (<span
+              id="count-completed-appts">2</span>)</button>
+          <button class="subtab-btn" data-filter="Cancelled">Cancelled (<span
+              id="count-cancelled-appts">1</span>)</button>
+        </div>
+
+        <!-- Appointments Table -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table" id="appointments-table">
+              <thead>
+                <tr>
+                  <th>Apt #</th>
+                  <th>Patient</th>
+                  <th>Attending Physician</th>
+                  <th>Specialty</th>
+                  <th>Date & Time</th>
+                  <th>Consulting Fee</th>
+                  <th>Status</th>
+                  <th class="text-right">Manage</th>
+                </tr>
+              </thead>
+              <tbody id="appointments-table-body">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 5: MEDICAL RECORDS (EHR) -->
+      <!-- ============================================== -->
+      <section id="tab-records" class="tab-pane">
+        <div class="pane-header">
+          <div class="pane-title-group">
+            <h2 class="pane-title">Electronic Health Records (EHR)</h2>
+            <p class="pane-subtitle">Clinical visit notes, symptoms, diagnosis, lab reports, and medication histories.
+            </p>
+          </div>
+          <div class="pane-actions">
+            <button class="btn btn-primary" id="btn-new-medical-record"><i class="fa-solid fa-notes-medical"></i> Add
+              Clinical Record</button>
+          </div>
+        </div>
+
+        <div class="records-grid" id="records-grid-container">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 6: PHARMACY & INVENTORY -->
+      <!-- ============================================== -->
+      <section id="tab-pharmacy" class="tab-pane">
+        <div class="pane-header">
+          <div class="pane-title-group">
+            <h2 class="pane-title">Pharmacy & Medication Inventory</h2>
+            <p class="pane-subtitle">Track batch quantities, expiry dates, unit prices, and automate restock alerts.</p>
+          </div>
+          <div class="pane-actions">
+            <button class="btn btn-primary" id="btn-add-medicine"><i
+                class="fa-solid fa-prescription-bottle-medical"></i> Add Medicine</button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table" id="pharmacy-table">
+              <thead>
+                <tr>
+                  <th>Item Code</th>
+                  <th>Medicine Name</th>
+                  <th>Category</th>
+                  <th>Stock Quantity</th>
+                  <th>Unit Price</th>
+                  <th>Batch Expiry</th>
+                  <th>Inventory Status</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="pharmacy-table-body">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 7: BILLING & INVOICING -->
+      <!-- ============================================== -->
+      <section id="tab-billing" class="tab-pane">
+        <div class="pane-header">
+          <div class="pane-title-group">
+            <h2 class="pane-title">Hospital Billing & Invoices</h2>
+            <p class="pane-subtitle">Patient invoices, treatment fee reconciliations, insurance claims, and instant
+              payment settlement.</p>
+          </div>
+          <div class="pane-actions">
+            <button class="btn btn-primary" id="btn-create-invoice"><i class="fa-solid fa-receipt"></i> Generate
+              Invoice</button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table" id="billing-table">
+              <thead>
+                <tr>
+                  <th>Invoice #</th>
+                  <th>Patient</th>
+                  <th>Services / Description</th>
+                  <th>Total Amount</th>
+                  <th>Billing Date</th>
+                  <th>Payment Status</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="billing-table-body">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 8: DATABASE & ARCHITECTURE HUB -->
+      <!-- ============================================== -->
+      <section id="tab-database" class="tab-pane">
+        <div class="pane-header">
+          <div class="pane-title-group">
+            <h2 class="pane-title">Database Schema & Java JDBC Architecture Hub</h2>
+            <p class="pane-subtitle">Interactive visual inspection of tables, live SQL statement runner, and transaction
+              simulation.</p>
+          </div>
+          <div class="pane-actions">
+            <span class="badge badge-success"><i class="fa-solid fa-check"></i> Connection String: OK</span>
+          </div>
+        </div>
+
+        <div class="architecture-diagram-card">
+          <h3 class="arch-title"><i class="fa-solid fa-diagram-project"></i> Application Data Pipeline Architecture</h3>
+          <div class="pipeline-flow">
+            <div class="pipeline-node">
+              <i class="fa-solid fa-desktop"></i>
+              <strong>Swing / Web UI</strong>
+              <small>Presentation Layer</small>
+            </div>
+            <div class="pipeline-connector"><i class="fa-solid fa-arrow-right"></i></div>
+            <div class="pipeline-node">
+              <i class="fa-solid fa-gears"></i>
+              <strong>DAO Layer</strong>
+              <small>PatientDAO, DoctorDAO</small>
+            </div>
+            <div class="pipeline-connector"><i class="fa-solid fa-arrow-right"></i></div>
+            <div class="pipeline-node highlight">
+              <i class="fa-solid fa-arrows-split-up-and-left"></i>
+              <strong>Transaction Manager</strong>
+              <small>Commit / Rollback</small>
+            </div>
+            <div class="pipeline-connector"><i class="fa-solid fa-arrow-right"></i></div>
+            <div class="pipeline-node">
+              <i class="fa-solid fa-database"></i>
+              <strong>MySQL 8.0 Engine</strong>
+              <small>healthcare_db</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- SQL Query Interactive Tester -->
+        <div class="sql-tester-card">
+          <div class="sql-tester-header">
+            <h4><i class="fa-solid fa-terminal"></i> Interactive JDBC Query Simulator</h4>
+            <div class="sql-preset-buttons">
+              <button class="btn btn-xs btn-outline" id="btn-sql-preset-select">SELECT Patients</button>
+              <button class="btn btn-xs btn-outline" id="btn-sql-preset-tx">Book Apt Transaction</button>
+              <button class="btn btn-xs btn-outline" id="btn-sql-preset-fk">Verify FKs</button>
+            </div>
+          </div>
+          <div class="sql-editor-wrapper">
+            <textarea id="sql-input-area" class="sql-textarea" rows="4" spellcheck="false">SELECT p.id, p.name, d.name AS doctor, a.appointment_date, a.status 
+FROM appointments a
+JOIN patients p ON a.patient_id = p.id
+JOIN doctors d ON a.doctor_id = d.id
+WHERE a.status = 'Scheduled';</textarea>
+            <div class="sql-editor-actions">
+              <button class="btn btn-primary" id="btn-execute-sql"><i class="fa-solid fa-play"></i> Execute
+                Query</button>
+            </div>
+          </div>
+          <div class="sql-result-container" id="sql-result-container">
+            <div class="sql-meta" id="sql-meta-text">Query executed in 2.1ms (3 rows returned). Simulated Connection ID:
+              #44</div>
+            <div class="table-responsive">
+              <table class="data-table code-table" id="sql-result-table">
+                <!-- Rendered dynamically -->
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schema Tables Inspector -->
+        <div class="schema-inspect-section">
+          <h3 class="panel-title"><i class="fa-solid fa-table"></i> Database Schema Definitions (database.sql)</h3>
+          <div class="schema-cards-grid">
+            <div class="schema-card">
+              <div class="schema-card-header">
+                <span class="table-name"><i class="fa-solid fa-table"></i> users</span>
+                <span class="badge badge-sm">4 columns</span>
+              </div>
+              <ul class="schema-cols">
+                <li><span class="col-name pk">id (PK)</span> <span class="col-type">INT AUTO_INC</span></li>
+                <li><span class="col-name">username</span> <span class="col-type">VARCHAR(50) UNIQUE</span></li>
+                <li><span class="col-name">password_hash</span> <span class="col-type">VARCHAR(64) SHA-256</span></li>
+                <li><span class="col-name">role</span> <span class="col-type">VARCHAR(20)</span></li>
+              </ul>
+            </div>
+
+            <div class="schema-card">
+              <div class="schema-card-header">
+                <span class="table-name"><i class="fa-solid fa-table"></i> patients</span>
+                <span class="badge badge-sm">10 columns</span>
+              </div>
+              <ul class="schema-cols">
+                <li><span class="col-name pk">id (PK)</span> <span class="col-type">INT AUTO_INC</span></li>
+                <li><span class="col-name">name</span> <span class="col-type">VARCHAR(100)</span></li>
+                <li><span class="col-name">age</span> <span class="col-type">INT</span></li>
+                <li><span class="col-name">gender</span> <span class="col-type">VARCHAR(20)</span></li>
+                <li><span class="col-name">blood_group</span> <span class="col-type">VARCHAR(10)</span></li>
+              </ul>
+            </div>
+
+            <div class="schema-card">
+              <div class="schema-card-header">
+                <span class="table-name"><i class="fa-solid fa-table"></i> doctors</span>
+                <span class="badge badge-sm">7 columns</span>
+              </div>
+              <ul class="schema-cols">
+                <li><span class="col-name pk">id (PK)</span> <span class="col-type">INT AUTO_INC</span></li>
+                <li><span class="col-name">name</span> <span class="col-type">VARCHAR(100)</span></li>
+                <li><span class="col-name">specialization</span> <span class="col-type">VARCHAR(100)</span></li>
+                <li><span class="col-name">fee</span> <span class="col-type">DECIMAL(10,2)</span></li>
+                <li><span class="col-name">available</span> <span class="col-type">BOOLEAN</span></li>
+              </ul>
+            </div>
+
+            <div class="schema-card">
+              <div class="schema-card-header">
+                <span class="table-name"><i class="fa-solid fa-table"></i> appointments</span>
+                <span class="badge badge-sm">7 columns</span>
+              </div>
+              <ul class="schema-cols">
+                <li><span class="col-name pk">id (PK)</span> <span class="col-type">INT AUTO_INC</span></li>
+                <li><span class="col-name fk">patient_id (FK)</span> <span class="col-type">REFERENCES
+                    patients(id)</span></li>
+                <li><span class="col-name fk">doctor_id (FK)</span> <span class="col-type">REFERENCES doctors(id)</span>
+                </li>
+                <li><span class="col-name">appointment_date</span> <span class="col-type">DATE</span></li>
+                <li><span class="col-name">status</span> <span class="col-type">VARCHAR(30)</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: REGISTER NEW PATIENT -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop hidden" id="modal-add-patient" role="dialog" aria-modal="true"
+    aria-labelledby="modal-add-patient-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-add-patient-title"><i class="fa-solid fa-user-plus"></i> Register Patient</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <form id="form-add-patient">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label for="p-name">Full Legal Name *</label>
+              <input type="text" id="p-name" class="form-control" required placeholder="e.g. Eleanor Vance">
+            </div>
+            <div class="form-group flex-1">
+              <label for="p-age">Age *</label>
+              <input type="number" id="p-age" class="form-control" required min="0" max="130" placeholder="34">
+            </div>
+            <div class="form-group flex-1">
+              <label for="p-gender">Gender *</label>
+              <select id="p-gender" class="form-control" required>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+                <option value="Non-Binary">Non-Binary</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="p-blood">Blood Group *</label>
+              <select id="p-blood" class="form-control" required>
+                <option value="O+">O positive (O+)</option>
+                <option value="A+">A positive (A+)</option>
+                <option value="B+">B positive (B+)</option>
+                <option value="AB+">AB positive (AB+)</option>
+                <option value="O-">O negative (O-)</option>
+                <option value="A-">A negative (A-)</option>
+                <option value="B-">B negative (B-)</option>
+                <option value="AB-">AB negative (AB-)</option>
+              </select>
+            </div>
+            <div class="form-group flex-1">
+              <label for="p-phone">Phone Number *</label>
+              <input type="tel" id="p-phone" class="form-control" required placeholder="+1 (555) 234-5678">
+            </div>
+            <div class="form-group flex-1">
+              <label for="p-email">Email Address</label>
+              <input type="email" id="p-email" class="form-control" placeholder="patient@example.com">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label for="p-emergency">Emergency Contact (Name & Phone) *</label>
+              <input type="text" id="p-emergency" class="form-control" required
+                placeholder="Robert Vance (Spouse) - +1 (555) 987-6543">
+            </div>
+            <div class="form-group flex-1">
+              <label for="p-status">Admission Status</label>
+              <select id="p-status" class="form-control">
+                <option value="Outpatient">Outpatient</option>
+                <option value="Inpatient">Inpatient</option>
+                <option value="Discharged">Discharged</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="p-address">Residential Address</label>
+            <input type="text" id="p-address" class="form-control" placeholder="124 Elmwood Avenue, Metro City">
+          </div>
+
+          <div class="transaction-callout">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span><strong>PatientDAO Transaction:</strong> Uses <code>conn.setAutoCommit(false)</code> with automatic
+              rollback safety on SQL exceptions.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Complete Registration</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: BOOK APPOINTMENT -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop hidden" id="modal-book-appt" role="dialog" aria-modal="true"
+    aria-labelledby="modal-book-appt-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-book-appt-title"><i class="fa-solid fa-calendar-plus"></i> Schedule Doctor
+          Consultation</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <form id="form-book-appt">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="appt-patient-select">Select Patient *</label>
+            <select id="appt-patient-select" class="form-control" required>
+              <!-- Populated via JS -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="appt-doctor-select">Attending Physician *</label>
+            <select id="appt-doctor-select" class="form-control" required>
+              <!-- Populated via JS -->
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="appt-date">Consultation Date *</label>
+              <input type="date" id="appt-date" class="form-control" required>
+            </div>
+            <div class="form-group flex-1">
+              <label for="appt-time">Time Slot *</label>
+              <select id="appt-time" class="form-control" required>
+                <option value="09:00:00">09:00 AM (Morning Slot)</option>
+                <option value="10:30:00" selected>10:30 AM (Morning Slot)</option>
+                <option value="11:45:00">11:45 AM (Morning Slot)</option>
+                <option value="14:00:00">02:00 PM (Afternoon Slot)</option>
+                <option value="15:30:00">03:30 PM (Afternoon Slot)</option>
+                <option value="17:00:00">05:00 PM (Evening Slot)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="appt-notes">Reason for Visit / Clinical Symptoms</label>
+            <textarea id="appt-notes" class="form-control" rows="2"
+              placeholder="e.g. Follow-up consultation for recurring hypertension, routine ECG review"></textarea>
+          </div>
+
+          <div class="transaction-callout success-callout">
+            <i class="fa-solid fa-handshake"></i>
+            <span><strong>ACID Transaction Guarantee:</strong> Doctor calendar slot locked and patient appointment
+              record written atomically.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calendar-check"></i> Confirm
+            Appointment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: PATIENT DOSSIER & CLINICAL DETAILS -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop hidden" id="modal-patient-dossier" role="dialog" aria-modal="true"
+    aria-labelledby="modal-dossier-title">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-dossier-title"><i class="fa-solid fa-id-card-clip"></i> Patient Clinical
+          Dossier</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body" id="patient-dossier-content">
+        <!-- Rendered dynamically on click -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal>Close</button>
+        <button class="btn btn-primary" id="btn-dossier-book-appt"><i class="fa-solid fa-calendar-plus"></i> Schedule
+          Appointment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Floating Action Button (FAB) -->
+  <button class="mobile-fab" id="mobile-fab" title="Quick Action" aria-label="Quick Action">
+    <i class="fa-solid fa-plus"></i>
+  </button>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+    <button class="mobile-nav-btn active" data-tab="tab-dashboard" aria-label="Command Center">
+      <i class="fa-solid fa-chart-pie"></i>
+      <span>Command</span>
+    </button>
+    <button class="mobile-nav-btn" data-tab="tab-patients" aria-label="Patients Directory">
+      <i class="fa-solid fa-hospital-user"></i>
+      <span>Patients</span>
+    </button>
+    <button class="mobile-nav-btn" data-tab="tab-doctors" aria-label="Physicians">
+      <i class="fa-solid fa-user-doctor"></i>
+      <span>Doctors</span>
+    </button>
+    <button class="mobile-nav-btn" data-tab="tab-appointments" aria-label="Appointments">
+      <i class="fa-solid fa-calendar-check"></i>
+      <span>Appts</span>
+    </button>
+    <button class="mobile-nav-btn" id="btn-mobile-more" aria-label="More Modules">
+      <i class="fa-solid fa-bars"></i>
+      <span>More</span>
+    </button>
+  </nav>
+
+  <!-- Mobile "More" Drawer -->
+  <div class="mobile-drawer-backdrop hidden" id="mobile-more-drawer">
+    <div class="mobile-drawer-sheet">
+      <div class="drawer-handle"></div>
+      <div class="drawer-header">
+        <h4 class="drawer-title"><i class="fa-solid fa-hospital"></i> Clinical Operations</h4>
+        <button class="drawer-close" id="btn-close-mobile-drawer">&times;</button>
+      </div>
+      <div class="drawer-grid">
+        <button class="drawer-item" data-tab="tab-records">
+          <div class="drawer-icon purple"><i class="fa-solid fa-file-waveform"></i></div>
+          <span>EHR Records</span>
+        </button>
+        <button class="drawer-item" data-tab="tab-pharmacy">
+          <div class="drawer-icon orange"><i class="fa-solid fa-pills"></i></div>
+          <span>Pharmacy</span>
+        </button>
+        <button class="drawer-item" data-tab="tab-billing">
+          <div class="drawer-icon green"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+          <span>Billing</span>
+        </button>
+        <button class="drawer-item" data-tab="tab-database">
+          <div class="drawer-icon blue"><i class="fa-solid fa-database"></i></div>
+          <span>SQL Hub</span>
+        </button>
+      </div>
+      <div class="drawer-footer-actions">
+        <button class="btn btn-primary full-width" id="btn-mobile-drawer-add-patient">
+          <i class="fa-solid fa-user-plus"></i> Register Patient
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+
+</html>
