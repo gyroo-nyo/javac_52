@@ -312,6 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderPharmacyTable();
   renderBillingTable();
   initSqlConsole();
+  syncWithJavaBackend();
 
   // Populate Select Boxes
   populatePatientSelects();
@@ -1332,3 +1333,30 @@ function formatTime(timeStr) {
   if (h === 0) h = 12;
   return `${h}:${m} ${ampm}`;
 }
+
+async function syncWithJavaBackend() {
+  try {
+    const res = await fetch('http://localhost:8080/api/status');
+    if (res.ok) {
+      const data = await res.json();
+      const statusBar = document.querySelector('.system-status-bar .status-left');
+      if (statusBar) {
+        let pill = document.getElementById('java-backend-pill');
+        if (!pill) {
+          pill = document.createElement('span');
+          pill.id = 'java-backend-pill';
+          pill.className = 'system-pill';
+          pill.style.background = 'rgba(16, 185, 129, 0.2)';
+          pill.style.color = '#10b981';
+          pill.style.borderColor = '#10b981';
+          statusBar.appendChild(pill);
+        }
+        pill.innerHTML = '<i class="fa-solid fa-mug-hot"></i> Java Servlets & JDBC Active';
+      }
+      console.log('[JAVA INTEGRATION] Synchronized with Java Web Integration Server:', data);
+    }
+  } catch (e) {
+    console.log('[JAVA INTEGRATION] Running in local demo mode.');
+  }
+}
+
